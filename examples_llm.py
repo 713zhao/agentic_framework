@@ -28,19 +28,18 @@ def create_agent_with_llm(llm_config):
         Goal(
             priority=1,
             name="Task",
-            description="Answer the user's question briefly"
-        ),
-        Goal(
-            priority=1,
-            name="Terminate",
-            description="Call terminate when done with your answer"
+            description="Answer the user's question with the terminate tool. Call terminate(message='your answer') immediately."
         )
     ]
+    
+    # Create registry with ONLY the terminate tool
+    action_registry = PythonActionRegistry(tool_names=["terminate"])
+    action_registry.register_terminate_tool()
     
     return Agent(
         goals=goals,
         agent_language=AgentFunctionCallingActionLanguage(),
-        action_registry=PythonActionRegistry(tags=["system"]),
+        action_registry=action_registry,
         generate_response=generate_response,
         environment=Environment(),
         llm_config=llm_config
@@ -101,10 +100,38 @@ def example_ollama():
     """Use local Ollama model."""
     print("=== Example 3: Local Ollama ===\n")
     
-    # Option A: Use preset
-    llm_config = LLAMA_LOCAL
+    # Option A: Use Phi3 (excellent function calling support!)
+    llm_config = create_ollama_config(
+        model="ollama/phi3:3.8b-mini-128k-instruct-q4_0",
+        api_base="http://localhost:11434",
+        temperature=0.7
+    )
     
-    # Option B: Custom local model
+    # Option B: Use Gemma3 1B (best function calling support!)
+    # llm_config = create_ollama_config(
+    #     model="ollama/gemma3:1b",
+    #     api_base="http://localhost:11434",
+    #     temperature=0.7
+    # )
+    
+    # Option C: Use Gemma2 2B text (supports function calling but less reliable)
+    # llm_config = create_ollama_config(
+    #     model="ollama/gemma2:2b-text-q8_0",
+    #     api_base="http://localhost:11434",
+    #     temperature=0.7
+    # )
+    
+    # Note: Qwen3 1.7B does NOT support function calling properly
+    # llm_config = create_ollama_config(
+    #     model="ollama/qwen3:1.7b",
+    #     api_base="http://localhost:11434",
+    #     temperature=0.7
+    # )
+    
+    # Option B: Use preset
+    # llm_config = LLAMA_LOCAL
+    
+    # Option C: Custom local model
     # llm_config = create_ollama_config(
     #     model="ollama/mistral",
     #     api_base="http://localhost:11434",
@@ -214,9 +241,9 @@ if __name__ == "__main__":
     print("="*60 + "\n")
     
     # Run examples
-    example_gemini()
+    # example_gemini()
     # example_openai()
-    # example_ollama()
+    example_ollama()  # Using Qwen 3 1.7B
     # example_anthropic()
     # example_compare_llms()
     # example_custom_llm()

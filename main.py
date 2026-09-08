@@ -10,6 +10,7 @@ from agent_framework import (
     Environment,
     generate_response,
     # LLM Configurations
+    create_ollama_config,
     GEMINI_FLASH,
     GeminiConfig,
     # Uncomment to try other providers:
@@ -27,28 +28,42 @@ def main():
     
     # Configure your LLM (pick one):
     
-    # Option 1: Use preset configurations
-    llm_config = GEMINI_FLASH
+    # Option 1: Use Mistral 7B (best working local model for complex tasks)
+    llm_config = create_ollama_config(
+        model="ollama/mistral:7b-instruct-v0.2-q4_K_M",
+        api_base="http://localhost:11434",
+        temperature=0.3
+    )
     
-    # Option 2: Create custom Gemini config
+    # Option 2: Use Gemma3 1B (good for simple tasks)
+    # llm_config = create_ollama_config(
+    #     model="ollama/gemma3:1b",
+    #     api_base="http://localhost:11434",
+    #     temperature=0.3
+    # )
+    
+    # Note: Gemma3 12B does NOT work well with this framework
+    # Note: Qwen3 1.7B does NOT support function calling
+    
+    # Option 2: Use Gemini (recommended for complex tasks)
+    # llm_config = GEMINI_FLASH
+    
+    # Option 3: Use Phi3 (good for simple tasks only)
+    # llm_config = create_ollama_config(
+    #     model="ollama/phi3:3.8b-mini-128k-instruct-q4_0",
+    #     api_base="http://localhost:11434",
+    #     temperature=0.7
+    # )
+    
+    # Option 4: Create custom Gemini config
     # llm_config = GeminiConfig(
     #     model="gemini/gemini-1.5-pro",
     #     temperature=0.7,
     #     max_tokens=2048
     # )
     
-    # Option 3: Use OpenAI
+    # Option 5: Use OpenAI
     # llm_config = GPT4O
-    
-    # Option 4: Use local Ollama
-    # llm_config = LLAMA_LOCAL
-    
-    # Option 5: Create custom config
-    # from agent_framework import create_ollama_config
-    # llm_config = create_ollama_config(
-    #     model="ollama/mistral",
-    #     api_base="http://localhost:11434"
-    # )
     
     print(f"Using LLM: {llm_config.provider}/{llm_config.model}\n")
     
